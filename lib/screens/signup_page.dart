@@ -1,10 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
-
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:moviesearch/api/auth_api.dart';
 import 'package:moviesearch/util/custom_snackbar.dart';
-import '../config.dart';
 import 'login_page.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -19,51 +16,32 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool _isNotValidate = false;
-
   void registerUser() async {
     if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
-      var regBody = {
-        "email": emailController.text,
-        "password": passwordController.text
-      };
-
       try {
-        var response = await http.post(
-          Uri.parse(registration),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(regBody),
+        var jsonResponse = await AuthApi.registerUser(
+          emailController.text,
+          passwordController.text,
         );
 
-        print('Status Code: ${response.statusCode}');
-        print('Response Body: ${response.body}');
-
-        if (response.statusCode == 200) {
-          var jsonResponse = jsonDecode(response.body);
-
-          if (jsonResponse.containsKey('status')) {
-            if (jsonResponse['status']) {
-              // User registration successful
-              showCustomSnackBar(context, 'Account created successfully!', Colors.green);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SignInPage(),
-                ),
-              );
-            } else {
-              // Registration failed
-              showCustomSnackBar(
-                  context, 'Registration failed. Try again.', Colors.red);
-            }
+        if (jsonResponse.containsKey('status')) {
+          if (jsonResponse['status']) {
+            // User registration successful
+            showCustomSnackBar(
+                context, 'Account created successfully!', Colors.green);
+            // Navigate to SignInPage upon successful registration
           } else {
-            print("Unexpected response format. 'status' key not found.");
+            // Registration failed
+            showCustomSnackBar(
+                context, 'Registration failed. Try again.', Colors.red);
           }
         } else {
-          print('Error: ${response.statusCode}');
-          // Handle non-200 status code appropriately
+          print("Unexpected response format. 'status' key not found.");
         }
       } catch (error) {
-        print('Error sending HTTP request: $error');
+        print(error);
+        showCustomSnackBar(
+            context, 'An error occurred. Please try again later.', Colors.red);
       }
     } else {
       setState(() {

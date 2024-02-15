@@ -1,14 +1,10 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
-
 import 'package:flutter/material.dart';
+import 'package:moviesearch/api/auth_api.dart';
 import 'package:moviesearch/screens/home_page.dart';
 import 'package:moviesearch/screens/signup_page.dart';
 import 'package:moviesearch/util/custom_snackbar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-import '../config.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -35,59 +31,45 @@ class _SignInPageState extends State<SignInPage> {
 
   void loginUser() async {
     if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
-      var reqBody = {
-        "email": emailController.text,
-        "password": passwordController.text
-      };
       try {
-        var response = await http.post(
-          Uri.parse(login),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(reqBody),
+        var jsonResponse = await AuthApi.loginUser(
+          emailController.text,
+          passwordController.text,
         );
 
-        print('Status Code: ${response.statusCode}');
-        print('Response Body: ${response.body}');
+        if (jsonResponse.containsKey('status')) {
+          if (jsonResponse['status']) {
+            // User login successful
+            var myToken = jsonResponse['token'];
+            prefs.setString('token', myToken);
 
-        if (response.statusCode == 200) {
-          var jsonResponse = jsonDecode(response.body);
+            showCustomSnackBar(context, 'Logged in successfully!',
+                const Color.fromARGB(255, 36, 152, 247));
 
-          if (jsonResponse.containsKey('status')) {
-            if (jsonResponse['status']) {
-              // User login successful
-              var myToken = jsonResponse['token'];
-              prefs.setString('token', myToken);
-
-              showCustomSnackBar(context, 'Logged in successfully!',
-                  const Color.fromARGB(255, 36, 152, 247));
-
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomeScreen(token: myToken),
-                ),
-              );
-            } else {
-              // Login failed
-              showCustomSnackBar(
-                  context, 'Invalid email or password', Colors.red);
-            }
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(token: myToken),
+              ),
+            );
           } else {
-            print("Unexpected response format. 'status' key not found.");
+            // Login failed
+            showCustomSnackBar(
+                context, 'Invalid email or password', Colors.red);
           }
         } else {
-          print('Error: ${response.statusCode}');
-          // Handle non-200 status code appropriately
+          print("Unexpected response format. 'status' key not found.");
         }
       } catch (error) {
-        print('Error sending HTTP request: $error');
+        print(error);
+        showCustomSnackBar(
+            context, 'An error occurred. Please try again later.', Colors.red);
       }
     } else {
       setState(() {
         _isNotValidate = true;
       });
 
-      // Show snackbar for validation error
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Enter proper information'),
