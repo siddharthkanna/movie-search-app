@@ -1,9 +1,6 @@
 // ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../config.dart';
+import 'package:moviesearch/api/movie_api.dart';
 import '../models/movie.dart';
 
 enum MovieSorting {
@@ -25,38 +22,15 @@ class MovieProvider with ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      const apiKey = movieApi;
-      const baseUrl = 'https://api.themoviedb.org/3';
-      final response = await http.get(
-        Uri.parse('$baseUrl/movie/top_rated?api_key=$apiKey&page=$page'),
-      );
-
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        final List<dynamic> movieList = jsonResponse['results'];
-
-        final List<Movie> newMovies = movieList.take(5).map((movieJson) {
-          return Movie(
-            name: movieJson['title'],
-            year: movieJson['release_date'],
-            rating: (movieJson['vote_average'] as num).toDouble(),
-            posterUrl: 'https://image.tmdb.org/t/p/w500${movieJson['poster_path']}',
-          );
-        }).toList();
-
-        _sortMovies(newMovies); 
-        movies.addAll(newMovies);
-        page++;
-      } else {
-        print('Failed to load top-rated movies');
-      }
+      final List<Movie> newMovies = await MovieApi.fetchTopRatedMovies(page);
+      _sortMovies(newMovies);
+      movies.addAll(newMovies);
+      page++;
     } catch (error) {
       print('Error fetching top-rated movies: $error');
     } finally {
       isLoading = false;
-      Future.delayed(Duration.zero, () {
-        notifyListeners();
-      });
+      notifyListeners();
     }
   }
 

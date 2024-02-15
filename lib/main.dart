@@ -23,12 +23,12 @@ class MyApp extends StatelessWidget {
   final token;
   const MyApp({
     @required this.token,
-    Key? key,
+    Key? key, 
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Movie Search App',
+      title: 'FlickFind',
       debugShowCheckedModeBanner: false,
       darkTheme: ThemeData(
         brightness: Brightness.dark,

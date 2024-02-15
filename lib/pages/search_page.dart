@@ -1,14 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:moviesearch/models/movie.dart';
-import 'package:http/http.dart' as http;
-
-import '../config.dart';
+import '../models/movie.dart';
 import '../widgets/movie_tile.dart';
+import '../api/movie_api.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  const SearchPage({Key? key}) : super(key: key);
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -16,59 +12,31 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
-  final List<Movie> _searchResults = [];
+  List<Movie> _searchResults = [];
   bool _isSearching = false;
   bool _showNoMoviesFound = false;
 
-  void searchMovie() async {
+  Future<void> searchMovie() async {
     setState(() {
       _isSearching = true;
       _showNoMoviesFound = false;
       _searchResults.clear();
     });
 
-    const apiKey = movieApi;
-    const baseUrl = 'https://api.themoviedb.org/3';
-    final query = _searchController.text;
-
-    if (query.isNotEmpty) {
-      final response = await http.get(Uri.parse('$baseUrl/search/movie?api_key=$apiKey&query=$query'));
-
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        final List<dynamic> movieList = jsonResponse['results'];
-
-        final List<Movie> searchResults = movieList
-            .where((movieJson) => movieJson['poster_path'] != null)
-            .map((movieJson) {
-          return Movie(
-            name: movieJson['title'],
-            year: movieJson['release_date'],
-            rating: (movieJson['vote_average'] as num).toDouble(),
-            posterUrl: 'https://image.tmdb.org/t/p/w500${movieJson['poster_path']}',
-          );
-        }).toList();
-
-        setState(() {
-          _searchResults.addAll(searchResults);
-          _isSearching = false;
-          if (_searchResults.isEmpty) {
-            _showNoMoviesFound = true;
-          }
-        });
-      } else {
-        setState(() {
-          _isSearching = false;
-        });
-        // Handle error
-        // ignore: avoid_print
-        print('Failed to load search results');
-      }
-    } else {
+    try {
+      final List<Movie> searchResults =
+          await MovieApi.searchMovie(_searchController.text);
+      setState(() {
+        _searchResults.addAll(searchResults);
+        _isSearching = false;
+        _showNoMoviesFound = _searchResults.isEmpty;
+      });
+    } catch (error) {
       setState(() {
         _isSearching = false;
-        _showNoMoviesFound = false;
+        _showNoMoviesFound = true;
       });
+      print('Error searching for movies: $error');
     }
   }
 
