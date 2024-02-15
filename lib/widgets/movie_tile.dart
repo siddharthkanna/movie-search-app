@@ -21,17 +21,16 @@ class MovieTile extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(10.0),
             child: Image.network(
-              movie.posterUrl,
+              movie.posterUrl ?? '',
               fit: BoxFit.cover,
               width: double.infinity,
-              height: double.infinity, // Fill the entire card
+              height: 500,
             ),
           ),
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10.0),
-              color:
-                  Colors.black.withOpacity(0.4), // Semi-transparent black color
+              color: Colors.black.withOpacity(0.4),
             ),
           ),
           Positioned.fill(
@@ -53,7 +52,7 @@ class MovieTile extends StatelessWidget {
                         children: [
                           Flexible(
                             child: Text(
-                              movie.name,
+                              movie.name ?? '',
                               style: const TextStyle(
                                 fontSize: 16.0,
                                 fontWeight: FontWeight.bold,
@@ -87,7 +86,7 @@ class MovieTile extends StatelessWidget {
                       ),
                       const SizedBox(height: 4.0),
                       Text(
-                        'Year: ${movie.year}',
+                        'Year: ${movie.year ?? ''}',
                         style: const TextStyle(
                           fontSize: 14.0,
                           color: Colors.white,
@@ -95,7 +94,7 @@ class MovieTile extends StatelessWidget {
                       ),
                       const SizedBox(height: 4.0),
                       Text(
-                        'IMDb Rating: ${movie.rating}',
+                        'IMDb Rating: ${movie.rating ?? ''}',
                         style: const TextStyle(
                           fontSize: 14.0,
                           color: Colors.white,

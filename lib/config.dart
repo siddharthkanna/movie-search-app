@@ -1,6 +1,6 @@
-var url = 'https://moviesearch-backend-mittarv.vercel.app';
-var registration = '${url}register';
-var login = '${url}login';
+var url = 'https://moviesearch-backend-mittarv.vercel.app/';
+var registration = url + 'register';
+var login = url + 'login';
 
 //movie
 const movieBaseUrl = 'https://api.themoviedb.org/3';
