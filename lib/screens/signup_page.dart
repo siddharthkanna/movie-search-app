@@ -63,8 +63,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Image.asset(
-                    'assets/images/camera.png',
-                    height: 80,
+                    'assets/images/letterboxd-logo.png',
+                    height: 100,
                   ),
                   const Text(
                     'Create your account',

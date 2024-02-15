@@ -1,4 +1,4 @@
-var url = 'https://mittarv-backend.vercel.app/';
+var url = 'https://moviesearch-backend-mittarv.vercel.app';
 var registration = '${url}register';
 var login = '${url}login';
 
